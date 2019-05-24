@@ -13,7 +13,9 @@ Autonom features:
 
 The following modules are available:
 
-- login_
+- login_form : simple HTML login form.
+- ident_sso : SSO based on an identd daemon response
+- gauth : Google OpenID Connect authentication
 
 
 
