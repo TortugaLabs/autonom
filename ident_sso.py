@@ -9,6 +9,7 @@ ACL = 'access-list'
 GROUPSFILE = autonom.GROUPSFILE
 IDENT_PORT = 'ident-port'
 SERVERPORTMAP = 'server-port-map'
+PROXY_LIST = 'proxy-list'
 
 def check_acl(ip, acl):
   for m in acl:
@@ -46,17 +47,24 @@ def map_user(raw_user, mapfile):
 
 def auto_login_hook(pid):
   cfg = autonom.get_provider(pid)
-  hdrs = dict(request.headers)
 
-  if 'X-My-Real-Ip' in hdrs and 'X-My-Real-Port' in hdrs and 'X-My-Server-Port' in hdrs:
-    remote_ip = hdrs['X-My-Real-Ip']
-    remote_port = int(hdrs['X-My-Real-Port'])
-    server_port = int(hdrs['X-My-Server-Port'])
-    if SERVERPORTMAP in cfg:
-      if server_port in cfg[SERVERPORTMAP]:
-       server_port = cfg[SERVERPORTMAP][server_port]
+  remote_ip = request.environ.get('REMOTE_ADDR')
+  if not remote_ip in cfg[PROXY_LIST]:
+    # Because bottlepy is not providing we can't do this for direct clients
+    return None
+
+  hdrs = dict(request.headers)
+  if 'X-Real-Ip' in hdrs and 'X-Real-Port' in hdrs and 'X-Real-Server-Port' in hdrs:
+    remote_ip = hdrs['X-Real-Ip']
+    remote_port = int(hdrs['X-Real-Port'])
+    server_port = int(hdrs['X-Real-Server-Port'])
   else:
     return None
+
+  if SERVERPORTMAP in cfg:
+    if server_port in cfg[SERVERPORTMAP]:
+     server_port = cfg[SERVERPORTMAP][server_port]
+
 
   if ACL in cfg:
     if not check_acl(remote_ip,cfg[ACL]):
@@ -84,7 +92,7 @@ def new_provider(opts):
     IDENT_PORT: 113,
     autonom.PRE_LOGIN_HOOK: auto_login_hook
   }
-  for optkey in [GROUPSFILE, MAPFILE, ACL, IDENT_PORT, SERVERPORTMAP]:
+  for optkey in [GROUPSFILE, MAPFILE, ACL, IDENT_PORT, SERVERPORTMAP, PROXY_LIST]:
     if optkey in opts:
       cfg[optkey] = opts[optkey]
 

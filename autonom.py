@@ -20,6 +20,7 @@ LOGOUT_PAGE_HTML = 'logout_page_html'
 LOGOUT_MSG = 'logout-msg'
 GROUPSFILE = 'groupsfile'
 IDGEN = 'idgen'
+AUTH_HOOK = 'auth-hook'
 
 HREF = 'href'
 NAME = 'name'
@@ -106,7 +107,7 @@ def expire_sessions():
   expired = []
   now = time.time()
   for sid in session_db:
-    timer,user,groups = session_db[sid]
+    timer,user,groups,start = session_db[sid]
     if timer+settings[MAX_SESSION] > now:
       continue
     expired.append(sid)
@@ -116,42 +117,36 @@ def expire_sessions():
 
 def new_session(user, groups, url=None):
   expire_sessions()
+  print('Creating new session: %s (%s)' % (user, ', '.join(groups)))
   
   while True:
     newid = str(uuid.uuid4())
     if not newid in session_db:
       break
 
-  if 'X-My-Host' in dict(request.headers):
-    domain = request.headers['X-My-Host'].split('.')
+  if 'X-Forwarded-Host' in dict(request.headers):
+    domain = request.headers['X-Forwarded-Host'].split('.')
     domain = domain[-2:]
     domain = '.'.join(domain)
   else:
     domain = request.headers['Host']
 
-  session_db[newid] = (time.time(),user,groups)
+  session_db[newid] = (time.time(),user,groups,time.time())
   response.set_cookie(COOKIE_NAME,newid,secret=SIGNATURE,httponly=True,domain=domain,path="/")
 
   if url:
     redirect(url)
   return "New session created for %s\n" % user
 
-
-def is_active_session():
-  sid = request.get_cookie(COOKIE_NAME, secret=SIGNATURE)
-  if sid:
-    expire_sessions()
-    if sid in session_db:
-      return True
-  return None
-
 def get_session():
   sid = request.get_cookie(COOKIE_NAME, secret=SIGNATURE)
   if sid:
     expire_sessions()
     if sid in session_db:
-      return session_db[sid][1],session_db[sid][2]
-  return None
+      timer,user,groups,start = session_db[sid]
+      session_db[sid] = (time.time(),user,groups,start)	# Update the session timer...
+      return user,groups
+  return None, None
 
 def del_session():
   sid = request.get_cookie(COOKIE_NAME, secret=SIGNATURE)
@@ -167,17 +162,22 @@ def no_cache():
 
 @route('/auth')
 def auth():
-  if is_active_session():
-    user,groups = get_session()
-    response.set_header('X-Username', 'alex')
-    response.set_header('X-Groups', 'alex,everyone,admins')
+  if AUTH_HOOK in settings:
+    res = settings[AUTH_HOOK]()
+    if res:
+      return res
+
+  user,groups = get_session()
+  if user:
+    response.set_header('X-Username', user)
+    response.set_header('X-Groups', groups)
     return "Active Session: %s\nGroups: %s\n" % (user,groups)
   abort(401,"Unathenticated")
 
 @route('/login/')
 def web_login():
-  if is_active_session():
-    user,groups = get_session()
+  user,groups = get_session()
+  if user:
     return "<pre>\nActive Session: %s\nGroups: %s\n</pre>\n" % (user,groups)
 
   for prov in settings[PROVIDERS]:
@@ -193,15 +193,12 @@ def web_login():
   for pp in settings[PROVIDERS]:
     if LOGIN_ITEM_HTML in settings[PROVIDERS][pp]:
       item = settings[PROVIDERS][pp][LOGIN_ITEM_HTML](pp)
-      print('DD ITEM %s' %item)
     elif HREF in settings[PROVIDERS][pp] and NAME in settings[PROVIDERS][pp]:
       item = {
        HREF: settings[PROVIDERS][pp][HREF],
        NAME: settings[PROVIDERS][pp][NAME]
       }
-      print('SS ITEM %s' %item)
     else:
-      print('%d has no ITEM (%s) or %s:%s' % (pp, LOGIN_ITEM_HTML, HREF, NAME))
       continue
     providers.extend([item])
 
@@ -220,26 +217,13 @@ def web_login():
 
 @route('/logout')
 def web_logout():
-  if is_active_session():
-    user,groups = get_session()
+  user,groups = get_session()
+  if user:
     del_session()
   else:
     user=None
     groups=[]
   return template(settings[LOGOUT_PAGE_HTML],user=user,groups=groups)
-
-@route('/hello')
-def show_headers():
-  hdrs = dict(request.headers)
-  import pprint
-  return '''
-      Got it
-      <pre>
-	%s
-
-	URL: %s
-      </pre>
-  ''' % (pprint.pformat(hdrs,2), request.url)
 
 if __name__ == "__main__":
   run(host='0.0.0.0', port=8080)

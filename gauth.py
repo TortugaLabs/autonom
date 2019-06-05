@@ -13,6 +13,7 @@ import google.oauth2.credentials
 import googleapiclient.discovery
 from bottle import route, run, request, response, abort,redirect
 import time
+import autonom
 
 ACCESS_TOKEN_URI = 'https://www.googleapis.com/oauth2/v4/token'
 AUTHORIZATION_URL = 'https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&prompt=consent'
@@ -24,7 +25,7 @@ CLIENT_SECRET = 'client-secret'
 MAP_FILE = 'map-file'
 MAX_SESSION = 'max-session'
 SIGNATURE = 'AhGheiF9wooth4Haeizai9oH'
-COOKIE = 'xxid'
+#COOKIE = 'xxid5GbzEdD3mYX1T8ZaHg'
 
 login_sessions = {}
 appcfg = {
@@ -74,16 +75,17 @@ def map_user(raw_user, mapfile):
 
 @route('/login/google')
 def login():
-  no_cache()
+  autonom.no_cache()
   uri = request.urlparts
-  auth_redirect_uri = '%s://%s/%s' % (uri.scheme, uri.netloc, uri.path + '-auth')
-  print('AUTH_REDIRECT_URL: '+auth_redirect_uri)
+  auth_redirect_uri = '%s://%s%s' % (uri.scheme, uri.netloc, uri.path + '-auth')
+  #print('AUTH_REDIRECT_URL: '+auth_redirect_uri)
   
-  session = OAuth2Session(CLIENT_ID, CLIENT_SECRET,
+  session = OAuth2Session(appcfg[CLIENT_ID], appcfg[CLIENT_SECRET],
 			scope=AUTHORIZATION_SCOPE,
 			redirect_uri=auth_redirect_uri)
   uri, state = session.create_authorization_url(AUTHORIZATION_URL)
-  response.set_cookie(COOKIE,state,secret=SIGNATURE,max_age=appcfg[MAX_SESSION],http_only=True)
+  #response.set_cookie(COOKIE,state,secret=SIGNATURE,max_age=appcfg[MAX_SESSION],http_only=True)
+  #response.set_cookie(COOKIE,state,secret=SIGNATURE,max_age=appcfg[MAX_SESSION])
   
   login_sessions[state] = {
     'timestamp': time.time()
@@ -93,11 +95,15 @@ def login():
   else:
     login_sessions[state]['url'] = None
 
+  login_sessions[state]['auth'] = auth_redirect_uri
+  #response.status = 302
+  #response.set_header('Location', uri)
+  #return 'Redirecting...'
   redirect(uri)
 
 @route('/login/google-auth')
 def google_auth_redirect():
-  no_cache()
+  autonom.no_cache()
   if not 'state' in request.query:
     abort(403,"Missing state parameter")
     return
@@ -105,48 +111,52 @@ def google_auth_redirect():
   expire_logins()
 
   if not state in login_sessions:
-    abort(401,"Invalid state parameter")
+    abort(401,"Invalid state parameter #1")
     return
 
-  if state != request.get_cookie(COOKIE,secret=SIGNATURE):
-    abort(401,"State parameter error")
-    return
+  #from pprint import pprint
+  #hdrs = dict(request.headers)
+  #pprint(hdrs)
 
   if 'url' in login_sessions[state]:
     url = login_sessions[state]['url']
-  else
+  else:
     url = None
+  auth_uri = login_sessions[state]['auth']
 
   del login_sessions[state]
 
-  session = OAuth2Session(CLIENT_ID, CLIENT_SECRET,
+  session = OAuth2Session(appcfg[CLIENT_ID], appcfg[CLIENT_SECRET],
 			scope=AUTHORIZATION_SCOPE,
 			state=state,
-			redirect_uri=AUTH_REDIRECT_URI)
+			redirect_uri= auth_uri)
+  #print('request.url: %s' % request.url)
+  #print('reditrect_uri (url): %s' % url)
+  #print('reditrect_uri (auth): %s' % auth_uri)
   oauth2_tokens = session.fetch_access_token(
                         ACCESS_TOKEN_URI,            
                         authorization_response=request.url)
-  print("TOKENS\n======")
-  pprint(oauth2_tokens)
+  #print("TOKENS\n======")
+  #pprint(oauth2_tokens)
   credentials = google.oauth2.credentials.Credentials(
                 oauth2_tokens['access_token'],
                 refresh_token=oauth2_tokens['refresh_token'],
-                client_id=CLIENT_ID,
-                client_secret=CLIENT_SECRET,
+                client_id=appcfg[CLIENT_ID],
+                client_secret=appcfg[CLIENT_SECRET],
                 token_uri=ACCESS_TOKEN_URI)
   oauth2_client = googleapiclient.discovery.build(
                         'oauth2', 'v2',
                         credentials=credentials)
   userinfo = oauth2_client.userinfo().get().execute()
-  print("USERINFO\n======")
-  pprint(userinfo)
+  #print("USERINFO\n======")
+  #pprint(userinfo)
 
   # Check if the e-mail is valid...
   if not 'email' in userinfo:
     abort(401,'Userinfo error')
     return
 
-  user = map_user(user, appcfg[MAP_FILE])
+  user = map_user(userinfo['email'], appcfg[MAP_FILE])
   if not user:
     abort(401,'Unauthorized')
 
