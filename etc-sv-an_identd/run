@@ -2,5 +2,5 @@
 # Optionally handle dependancies
 sv start socklog-unix || exit 1
 # Start the daemon (must not fork)
-exec my-identd-bin --no-user
+exec /usr/local/sbin/an_identd --no-user
 
