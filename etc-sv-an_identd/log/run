@@ -1,0 +1,2 @@
+#!/bin/sh
+exec logger -p local3.info --tag an_identd

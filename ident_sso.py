@@ -22,10 +22,10 @@ def ident_query(rem_ip, rem_port, my_port,port=113):
     import socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((rem_ip, port))
-    s.sendall('%d, %d' % (rem_port, my_port))
+    s.sendall(('%d, %d' % (rem_port, my_port)).encode('ascii'))
     data = s.recv(1024)
     s.close()
-    resp = data.strip().split(':',4)
+    resp = data.decode('ascii').strip().split(':',4)
     if len(resp) != 4 or resp[1].strip() != 'USERID' or resp[2].strip() != 'UNIX':
       return None
 

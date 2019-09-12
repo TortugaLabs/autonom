@@ -17,6 +17,10 @@ The following modules are available:
 - ident_sso : SSO based on an identd daemon response
 - gauth : Google OpenID Connect authentication
 
+# TODO
+
+- ident_sso should have an option to authenticate after clicking a link (instead of automatic)
+- logout should accept an URL to redirect user elsewhere
 
 
 [bottlepy]: http://bottlepy.org/
