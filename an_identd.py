@@ -57,18 +57,18 @@ def is_valid_port(port):
 
 
 def match_line(line, lport, rport):
-  print('lport=%d rport=%d line=%s' % (lport,rport,line))
+  # ~ print('lport=%d rport=%d line=%s' % (lport,rport,line))
   try:
     line = line.split()
     port = int(line[1].split(':')[1],16)
-    print('port=%d lport=%d' % (port,lport))
+    # ~ print('port=%d lport=%d' % (port,lport))
     if port != lport:
       return None
     port = int(line[2].split(':')[1],16)
-    print('port=%d rport=%d' % (port,rport))
+    # ~ print('port=%d rport=%d' % (port,rport))
     if port != rport:
       return None
-    print('state: %s' % line[3])
+    # ~ print('state: %s' % line[3])
     if line[3] == '0A':
       return None
     return int(line[7])
@@ -86,7 +86,7 @@ def get_uid_from_port(source_ip, lport, rport):
   else:
     tables = ["/proc/net/tcp6","/proc/net/tcp"]
 
-  print('lport=%d rport=%d, tables=%s' % (lport, rport, tables))
+  # ~ print('lport=%d rport=%d, tables=%s' % (lport, rport, tables))
 
   for target in tables:
     with open(target) as proc_net_tcp:
@@ -123,14 +123,14 @@ def identd_response(srcip, data):
 
   if cfg[MAPFILE]:
     try:
-      with open(mapfile, "r") as fp:
+      with open(cfg[MAPFILE], "r") as fp:
         for line in fp:
           (key,val) = line.split(':')
           if val.strip() == username:
             return "%s : USERID : UNIX : %s" % (data, key.strip())
       return None
     except IOError as err:
-      pass
+      print('error reading mapfile: %s' % err)
 
   # See if user has a .fakeid
   fakeid = os.path.join(pwd.getpwuid(uid).pw_dir, cfg[FAKEFILE])
@@ -147,7 +147,7 @@ def identd_response(srcip, data):
             username = line.rstrip()
             break
     except IOError as err:
-      pass
+      print('error reading fake id file: %s' % err)
 
   return "%s : USERID : UNIX : %s" % (data, username)
 
