@@ -13,14 +13,23 @@ Autonom features:
 
 The following modules are available:
 
+Login providers:
+
 - login_form : simple HTML login form.
-- ident_sso : SSO based on an identd daemon response
-- gauth : Google OpenID Connect authentication
+
+Backend providers:
+
+- flatfiles
+- tlrealms
 
 # TODO
 
-- ident_sso should have an option to authenticate after clicking a link (instead of automatic)
-- logout should accept an URL to redirect user elsewhere
+- nginx testing
+- backend:tlrealm
+- session: delete other tickets, delete specific ticket
+- pw change interface
+- pw chfn: shell, gecos
+
 
 
 [bottlepy]: http://bottlepy.org/

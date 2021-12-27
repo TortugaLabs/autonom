@@ -1,7 +1,0 @@
-#!/bin/sh
-# Optionally handle dependancies
-sv start socklog-unix || exit 1
-# Start the daemon (must not fork)
-exec /usr/local/sbin/an_identd --no-user --mapfile=/etc/tlr-local/ident_sso.map
-
-
