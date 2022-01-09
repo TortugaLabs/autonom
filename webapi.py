@@ -16,12 +16,24 @@ def index():
   redirect('/hello')
 
 @route('/static/<filename:path>')
+@route('/autonom/static/<filename:path>')
 def serve_static(filename):
   return static_file(filename, root=cfg[CF_DOCROOT])
 
 @route('/favicon.ico')
 def favicon():
   return static_file('favicon.ico', root=cfg[CF_DOCROOT])
+
+@route('/test')
+def simple_test():
+  kw = {
+    'headers': request.headers,
+    'cookies': request.cookies,
+    'env': request.environ,
+    'http_client': butils.http_client(request,cfg,True)
+  }
+  return template('test',**kw)
+
 
 @route('/hello')
 @route('/hello/<smgr>/<name>')
@@ -62,8 +74,8 @@ def hello_world(smgr=DEFAULT_SESSMGR,name='stranger'):
   }
   return template('hello',**kw)
 
-@route('/login')
-@route('/login/<smgr>')
+@route('/autonom/login')
+@route('/autonom/login/<smgr>')
 def web_login(smgr=DEFAULT_SESSMGR):
   if not smgr in cfg[RT_SESSION_MGR]:
     return abort(404,'Missing session manager {smgr}'.format(smgr=smgr))
@@ -101,8 +113,8 @@ def web_login(smgr=DEFAULT_SESSMGR):
 
   return template('login-menu',**ret)
 
-@route('/logout/confirm')
-@route('/logout/confirm/<smgr>')
+@route('/autonom/logout/confirm')
+@route('/autonom/logout/confirm/<smgr>')
 def do_logout(smgr=DEFAULT_SESSMGR):
   if not smgr in cfg[RT_SESSION_MGR]:
     return abort(404,'Missing session manager {smgr}'.format(smgr=smgr))
@@ -115,12 +127,12 @@ def do_logout(smgr=DEFAULT_SESSMGR):
   if 'url' in request.params:
     url = request.params['url']
   else:
-    url = '/login/{smgr}'.format(smgr=smgr)
+    url = '/autonom/login/{smgr}'.format(smgr=smgr)
   redirect(url)
 
-@route('/logout')
-@route('/logout/menu')
-@route('/logout/menu/<smgr>')
+@route('/autonom/logout')
+@route('/autonom/logout/menu')
+@route('/autonom/logout/menu/<smgr>')
 def web_logout(smgr=DEFAULT_SESSMGR):
   if not smgr in cfg[RT_SESSION_MGR]:
     return abort(404,'Missing session manager {smgr}'.format(smgr=smgr))
@@ -132,8 +144,10 @@ def web_logout(smgr=DEFAULT_SESSMGR):
     'url': None,
     'suffix': '',
     'user': user,
-    'referer': request.headers['Referer'],
+    'referer': None,
   }
+  if 'Referer' in request.headers:
+    kw['referer'] = request.headers['Referer']
   if 'url' in request.params:
     kw['url'] = request.params['url']
     suffix='?url=' + urlquote(kw['url'])

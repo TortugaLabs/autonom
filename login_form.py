@@ -7,8 +7,8 @@ import userdb
 NAME = 'login_form'
 DEFAULTS = {
   CF_DESC: 'Login form',
-  CF_HREF: '/login_form/{id}/{smgr}{suffix}',
-  CF_ROUTE: '/login_form/<prid>/<smgr>',
+  CF_HREF: '/autonom/login_form/{id}/{smgr}{suffix}',
+  CF_ROUTE: '/autonom/login_form/<prid>/<smgr>',
   CF_VIEW: 'login_form',
   CF_PWCK: None,
 }
@@ -59,7 +59,7 @@ def lf_post(prid,smgr):
     if not user is None:
       tixid = smod.new_session(user, prid, cfg)
       if kw['url'] is None: return redirect('/hello/{smgr}'.format(smgr=smgr))
-      return redirect(url)
+      return redirect(kw['url'])
 
     if extra is None:
       kw['msg'] = 'pwck error'

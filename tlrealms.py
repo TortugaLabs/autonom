@@ -25,7 +25,7 @@ def init(beid,cfv,cfg):
     return False
   if not os.path.isdir(cfv[CF_TLREALMS_DATA]):
     sys.stderr.write('{dir} for configured {key} not found in backend {beid}\n'.format(
-                      di=cfv[CF_TLREALMS_DATA],key=CF_TLREALMS_DATA,beid=beid))
+                      dir=cfv[CF_TLREALMS_DATA],key=CF_TLREALMS_DATA,beid=beid))
     return False
   return True
 

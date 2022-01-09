@@ -37,7 +37,7 @@ def auth():
 def authorize(auth):
   if not auth: return None, None
   auth = shlex.split(auth)
-  print(auth)
+  #print(auth)
   if len(auth) < 2 or auth[0] != 'Digest': return None, None
 
   req = {}
@@ -55,12 +55,12 @@ def authorize(auth):
   # make sure that all fields are there...
   for x in ['username','realm','nonce','uri','response']:
     if not x in req:
-      print('Missing "%s" in response' % x)
+      #print('Missing "%s" in response' % x)
       return None, None
 
   method = request.headers.get('X-Origin-Method')
   if not method: method = 'GET'
-  print('method: {}'.format(method))
+  # print('method: {}'.format(method))
 
   pwck = cfg[CF_PWCK]
   user, ignore = userdb.check_digest(method,req,pwck,cfg)

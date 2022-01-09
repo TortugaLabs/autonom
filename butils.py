@@ -3,6 +3,7 @@
 #
 import socket
 import ipacl
+from const import *
 
 envkeys = {
   'HTTP_X_REAL_IP': 'addr',

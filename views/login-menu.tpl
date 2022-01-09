@@ -18,7 +18,7 @@
 	<tr><td>Ticket:</td><td>{{ticket}}></td></tr>
 	<tr><td>Groups:</td><td>{{groups}}</td></tr>
       </table>
-      <a href="/logout">Logout</a>
+      <a href="/autonom/logout">Logout</a>
     % else:
       <h1>Autonom Login Menu</h1>
       <ul>

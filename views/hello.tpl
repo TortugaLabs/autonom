@@ -12,9 +12,9 @@
     % if session:
     <p>Logged in as {{session}} {{groups}}</p>
     <p>Ticket: {{ticket}}</p>
-    <p><a href='/logout/menu/{{smgr}}'>Logout</a></p>
+    <p><a href='/autonom/logout/menu/{{smgr}}'>Logout</a></p>
     % else:
-    <p><a href='/login/{{smgr}}'>Login</a></p>
+    <p><a href='/autonom/login/{{smgr}}'>Login</a></p>
     % end
     <h2>Request details</h2>
     <table>

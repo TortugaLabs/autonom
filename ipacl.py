@@ -39,9 +39,9 @@ def parse_list(iptext):
   return iplist
 
 def check_list(addr, iplist):
-  print('addr: {addr}'.format(addr=addr))
+  # ~ print('addr: {addr}'.format(addr=addr))
   for checker,pattern in iplist:
-    print('pat: {pat} | check: {checker}'.format(pat=pattern,checker=checker))
+    # ~ print('pat: {pat} | check: {checker}'.format(pat=pattern,checker=checker))
     if checker(pattern,addr): return True
   return False
 

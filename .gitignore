@@ -1,2 +1,4 @@
 *.pyc
 .be/id-cache
+autonom-tix.db
+data

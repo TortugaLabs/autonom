@@ -10,8 +10,10 @@
     <h1>Autonom Logout</h1>
     %if user:
       <p>You are logged in as {{user}}.</p>
-      <p><a href="/logout/confirm/{{smgr}}{{suffix}}">Confirm Logout?</a></p>
+      <p><a href="/autonom/logout/confirm/{{smgr}}{{suffix}}">Confirm Logout?</a></p>
+      %if referer:
       <p><a href="{{referer}}">Back</a></p>
+      %end
       <p>All <em>{{smgr}}</em> sessions</p>
       <table border=1>
 	<tr>
@@ -29,7 +31,7 @@
       </table>
     %else:
       <p>You do not have any active sessions</p>
-      <p><a href="/login/{{smgr}}{{suffix}}">Login</a></p>
+      <p><a href="/autonom/login/{{smgr}}{{suffix}}">Login</a></p>
     %end
   </body>
 </html>
