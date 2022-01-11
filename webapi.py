@@ -195,16 +195,28 @@ def format_tmlen(tt):
 
 @route('/auth')
 @route('/auth/<smgr>')
-def auth(smgr=DEFAULT_SESSMGR):
+@route('/auth/<smgr>/<grps>')
+def auth(smgr=DEFAULT_SESSMGR,pgrps=None):
   if isinstance(cfg[CF_FIXED_IP_LIST],dict):
     client = butils.http_client(request,cfg)
     addr = client['addr']
     if addr in cfg[CF_FIXED_IP_LIST]:
       user = cfg[CF_FIXED_IP_LIST][addr][0]
-      groups = ','.join(cfg[CF_FIXED_IP_LIST][addr][0][1:])
+      groups = ','.join(cfg[CF_FIXED_IP_LIST][addr][1:])
+
+      if not pgrps is None:
+        allowed = False
+        for i in pgrps.split(','):
+          if i in cfg[CF_FIXED_IP_LIST][addr][1:]:
+            allowed = True
+            break
+        if not allowed:
+          abort(403,'Forbiddend');
 
       response.set_header('X-Username', user)
       response.set_header('X-Groups', groups)
+
+
       return 'FIXED IP SESSION<br>\nUser: {user}<br>\nGroups: {groups}'.format(user=user,groups=groups)
 
   if not smgr in cfg[RT_SESSION_MGR]:
@@ -217,6 +229,15 @@ def auth(smgr=DEFAULT_SESSMGR):
     cfv = cfg[CF_PROVIDERS][prid]
     grplst = userdb.get_groups(user,cfv[CF_PWCK],cfg)
     groups = ','.join(grplst)
+
+    if not pgrps is None:
+      allowed = False
+      for i in pgrps.split(','):
+        if i in grplst:
+          allowed = True
+          break
+      if not allowed:
+        abort(403,'Forbiddend');
 
     response.set_header('X-Username', user)
     response.set_header('X-Groups', groups)

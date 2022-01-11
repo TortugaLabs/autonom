@@ -1,0 +1,5 @@
+#!/bin/sh
+rc=0
+find . -type f ! -name '*.pyc' \
+	| xargs grep [tT]ODO:  \
+	| sed -e 's!:.*\([tT]ODO\):!: \1:!'
