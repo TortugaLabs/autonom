@@ -16,6 +16,6 @@ jobs:
         run: |
           echo ${{ github.event_name }}
           if [ -d wfscripts/checks ] ; then
-            run-parts wfscripts/checsk || exit 1
+            run-parts wfscripts/checks || exit 1
           fi
 
