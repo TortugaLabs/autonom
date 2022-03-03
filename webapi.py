@@ -91,6 +91,7 @@ def web_login(smgr=DEFAULT_SESSMGR):
       'user': user,
       'ticket': tix,
       'groups': grplst,
+      'url': None,
     }
   else:
     ret = {
@@ -103,6 +104,7 @@ def web_login(smgr=DEFAULT_SESSMGR):
       suffix = ''
     else:
       suffix = '?url=' + urlquote(ret['url'])
+    ret['suffix'] =  suffix
 
     for p in cfg[CF_PROVIDERS]:
       ret['providers'].append({
@@ -131,9 +133,11 @@ def do_logout(smgr=DEFAULT_SESSMGR):
   redirect(url)
 
 @route('/autonom/logout')
+@route('/autonom/logout/msg/<msg>')
 @route('/autonom/logout/menu')
 @route('/autonom/logout/menu/<smgr>')
-def web_logout(smgr=DEFAULT_SESSMGR):
+@route('/autonom/logout/menu/<smgr>/msg/<msg>')
+def web_logout(smgr=DEFAULT_SESSMGR,msg=None):
   if not smgr in cfg[RT_SESSION_MGR]:
     return abort(404,'Missing session manager {smgr}'.format(smgr=smgr))
   smod = cfg[RT_SESSION_MGR][smgr]
@@ -145,12 +149,14 @@ def web_logout(smgr=DEFAULT_SESSMGR):
     'suffix': '',
     'user': user,
     'referer': None,
+    'msg': 'Logout',
   }
+
   if 'Referer' in request.headers:
     kw['referer'] = request.headers['Referer']
   if 'url' in request.params:
     kw['url'] = request.params['url']
-    suffix='?url=' + urlquote(kw['url'])
+    kw['suffix']='?url=' + urlquote(kw['url'])
 
   if user:
     kw['user_sessions'] = []
@@ -195,16 +201,28 @@ def format_tmlen(tt):
 
 @route('/auth')
 @route('/auth/<smgr>')
-def auth(smgr=DEFAULT_SESSMGR):
+@route('/auth/<smgr>/<pgrps>')
+def auth(smgr=DEFAULT_SESSMGR,pgrps=None):
   if isinstance(cfg[CF_FIXED_IP_LIST],dict):
     client = butils.http_client(request,cfg)
     addr = client['addr']
     if addr in cfg[CF_FIXED_IP_LIST]:
       user = cfg[CF_FIXED_IP_LIST][addr][0]
-      groups = ','.join(cfg[CF_FIXED_IP_LIST][addr][0][1:])
+      groups = ','.join(cfg[CF_FIXED_IP_LIST][addr][1:])
+
+      if not pgrps is None:
+        allowed = False
+        for i in pgrps.split(','):
+          if i in cfg[CF_FIXED_IP_LIST][addr][1:]:
+            allowed = True
+            break
+        if not allowed:
+          abort(403,'Forbidden');
 
       response.set_header('X-Username', user)
       response.set_header('X-Groups', groups)
+
+
       return 'FIXED IP SESSION<br>\nUser: {user}<br>\nGroups: {groups}'.format(user=user,groups=groups)
 
   if not smgr in cfg[RT_SESSION_MGR]:
@@ -217,6 +235,15 @@ def auth(smgr=DEFAULT_SESSMGR):
     cfv = cfg[CF_PROVIDERS][prid]
     grplst = userdb.get_groups(user,cfv[CF_PWCK],cfg)
     groups = ','.join(grplst)
+
+    if not pgrps is None:
+      allowed = False
+      for i in pgrps.split(','):
+        if i in grplst:
+          allowed = True
+          break
+      if not allowed:
+        abort(403,'Forbidden');
 
     response.set_header('X-Username', user)
     response.set_header('X-Groups', groups)

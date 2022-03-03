@@ -24,8 +24,9 @@ Backend providers:
 
 # TODO
 
-- nginx testing
-- backend:tlrealm
+- make it so that we can cache some sessions in memory
+  and don't touch the filesystem
+- change logout screen in to a 403 page.
 - session: delete other tickets, delete specific ticket
 - pw change interface
 - pw chfn: shell, gecos

@@ -2,12 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Autonom Logout</title>
+    <title>Autonom: {{msg}}</title>
     <!-- link rel="stylesheet" href="style.css" -->
     <!-- script src="script.js" --><!-- /script -->
   </head>
   <body>
-    <h1>Autonom Logout</h1>
+    <h1>Autonom: {{msg}}</h1>
     %if user:
       <p>You are logged in as {{user}}.</p>
       <p><a href="/autonom/logout/confirm/{{smgr}}{{suffix}}">Confirm Logout?</a></p>
