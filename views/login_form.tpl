@@ -27,8 +27,8 @@
 	  </tr>
 	  <tr>
 	    <th rowspan=2>
-	      <input type="submit" name="do_login" value="Login">
 	      <input type="submit" name="do_cancel" value="Cancel">
+	      <input type="submit" name="do_login" value="Login">
 	    </th>
 	  </tr>
 	</table>
