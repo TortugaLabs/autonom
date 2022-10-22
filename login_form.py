@@ -9,6 +9,7 @@ DEFAULTS = {
   CF_DESC: 'Login form',
   CF_HREF: '/autonom/login_form/{id}/{smgr}{suffix}',
   CF_ROUTE: '/autonom/login_form/<prid>/<smgr>',
+  CF_CANCEL: '/autonom/login',
   CF_VIEW: 'login_form',
   CF_PWCK: None,
 }
@@ -29,6 +30,11 @@ def lf_dialog(prid,smgr):
   }
   if 'url' in request.params: kw['url'] = request.params['url']
   if 'msg' in request.params: kw['msg'] = request.params['msg']
+  if kw['url'] is None:
+    kw['cancel_url'] = cfv[CF_CANCEL]
+  else:
+    kw['cancel_url'] = cfv[CF_CANCEL] + '?url=' + urlquote(kw['url'])
+
   return template(cfv[CF_VIEW], **kw, **cfv)
 
 def lf_post(prid,smgr):
@@ -44,13 +50,9 @@ def lf_post(prid,smgr):
   if 'url' in request.params: kw['url'] = request.params['url']
   if 'msg' in request.params: kw['msg'] = request.params['msg']
   if kw['url'] is None:
-    suffix = ''
+    kw['cancel_url'] = cfv[CF_CANCEL]
   else:
-    suffix = '?url=' + urlquote(kw['url'])
-
-  if not 'do_login' in request.forms:
-    # User is cancelling...
-    return redirect('/login' + suffix)
+    kw['cancel_url'] = cfv[CF_CANCEL] + '?url=' + urlquote(kw['url'])
 
   if ('username' in request.forms) and ('password' in request.forms):
     user, extra = userdb.check_password(request.forms['username'],

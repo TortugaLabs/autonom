@@ -23,6 +23,7 @@ CF_DESC = 'desc'
 CF_ROUTE = 'route'
 CF_VIEW = 'view'
 CF_PWCK = 'pwck'
+CF_CANCEL = 'cancel_login_url'
 
 CF_COOKIE_NAME = 'cookie_name'
 CF_SESSION_SIG = 'session_sig'

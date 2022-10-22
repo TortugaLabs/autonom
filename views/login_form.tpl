@@ -19,19 +19,28 @@
 	<table>
 	  <tr>
 	    <td>User:</td>
-	    <td><input type="text" name="username"></td>
+	    <td><input type="text" name="username" onkeydown='handleEnter(event)'></td>
 	  </tr>
 	  <tr>
 	    <td>Password:</td>
-	    <td><input type="password" name="password"></td>
+	    <td><input type="password" name="password" id="pwfld"></td>
 	  </tr>
 	  <tr>
 	    <th rowspan=2>
-	      <input type="submit" name="do_cancel" value="Cancel">
+	      <a href="{{cancel_url}}"><button type="button">Cancel</button></a>
 	      <input type="submit" name="do_login" value="Login">
 	    </th>
 	  </tr>
 	</table>
       </form>
+      <script>
+	function handleEnter(event) {
+	  if (event.key==="Enter") {
+	    pwfld = document.getElementById("pwfld");
+	    pwfld.focus();
+	    event.preventDefault();
+	  }
+	}
+      </script>
   </body>
 </html>
