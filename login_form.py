@@ -1,6 +1,7 @@
 #/usr/bin/env python
 from bottle import route, template, request, redirect
 from const import *
+from version import VERSION
 from urllib.parse import quote_plus as urlquote
 import userdb
 
@@ -35,7 +36,7 @@ def lf_dialog(prid,smgr):
   else:
     kw['cancel_url'] = cfv[CF_CANCEL] + '?url=' + urlquote(kw['url'])
 
-  return template(cfv[CF_VIEW], **kw, **cfv)
+  return template(cfv[CF_VIEW], **kw, **cfv, version=VERSION)
 
 def lf_post(prid,smgr):
   if not smgr in cfg[RT_SESSION_MGR]:
@@ -70,7 +71,7 @@ def lf_post(prid,smgr):
   else:
     kw['msg'] = 'Login error'
 
-  return template(cfv[CF_VIEW],**kw, **cfv)
+  return template(cfv[CF_VIEW],**kw, **cfv, version=VERSION)
 
 
 

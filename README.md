@@ -36,6 +36,7 @@ Backend providers:
 - 2.1.0
   - Added viewport settings for Mobile compatibility
   - change login form layout
+  - report version information
 - 2.0.1
   - adding pack script
   - adding sample nginx config

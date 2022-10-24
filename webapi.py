@@ -5,6 +5,7 @@
 from bottle import route, static_file, template, request, redirect, response, abort
 from ini import cfg
 from const import *
+from version import VERSION
 from urllib.parse import quote_plus as urlquote
 from time import time
 import butils
@@ -32,7 +33,7 @@ def simple_test():
     'env': request.environ,
     'http_client': butils.http_client(request,cfg,True)
   }
-  return template('test',**kw)
+  return template('test',**kw, version=VERSION)
 
 
 @route('/hello')
@@ -72,7 +73,7 @@ def hello_world(smgr=DEFAULT_SESSMGR,name='stranger'):
     'forms': request.forms,
     'env': request.environ,
   }
-  return template('hello',**kw)
+  return template('hello',**kw, version=VERSION)
 
 @route('/autonom/login')
 @route('/autonom/login/<smgr>')
@@ -113,7 +114,7 @@ def web_login(smgr=DEFAULT_SESSMGR):
         'desc': cfg[CF_PROVIDERS][p][CF_DESC],
       })
 
-  return template('login-menu',**ret)
+  return template('login-menu',**ret, version=VERSION)
 
 @route('/autonom/logout/confirm')
 @route('/autonom/logout/confirm/<smgr>')
@@ -172,7 +173,7 @@ def web_logout(smgr=DEFAULT_SESSMGR,msg=None):
       # TODO: Logout a session
       # TODO: Logout all sessions
 
-  return template('logout',**kw)
+  return template('logout',**kw, version=VERSION)
 
 
 def format_tmlen(tt):

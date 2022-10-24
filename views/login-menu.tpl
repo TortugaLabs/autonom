@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autonom Login Menu</title>
+    <title>Autonom Login Menu | autonom v{{version}}</title>
     <!-- link rel="stylesheet" href="style.css" -->
     <!-- script src="script.js" --><!-- /script -->
     % if not active and len(providers) == 1:
